@@ -8,6 +8,14 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection without a connection pool
 }
 
+model st_combus_heat_content {
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fuel_type     String @db.VarChar(250)
+  fuel_sub_type String @db.VarChar(250)
+  hc_value      Float
+  hc_unit       String @db.VarChar(250)
+}
+
 model st_combus_quant_based_emis {
   id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   fuel_type      String @db.VarChar(250)

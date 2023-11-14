@@ -1,4 +1,5 @@
 "use client";
+import NexaLogo from "@/components/logo";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ChevronDownIcon,
@@ -7,18 +8,15 @@ import {
 import {
   Bars3Icon,
   BellIcon,
-  CalendarIcon,
   Cog6ToothIcon,
-  FolderIcon,
   HomeIcon,
-  UsersIcon,
   XMarkIcon,
+  HomeModernIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment, useState } from "react";
-import NexaLogo from "@/components/logo";
 
 const navigation = [
   {
@@ -151,14 +149,14 @@ export default function Example({ children }: { children: React.ReactNode }) {
 
                         <li className="mt-auto">
                           <Link
-                            href="#"
+                            href="/"
                             className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
                           >
-                            <Cog6ToothIcon
+                            <HomeModernIcon
                               className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
                               aria-hidden="true"
                             />
-                            Settings
+                            Go Home
                           </Link>
                         </li>
                       </ul>
@@ -217,14 +215,14 @@ export default function Example({ children }: { children: React.ReactNode }) {
 
                 <li className="mt-auto">
                   <Link
-                    href="#"
+                    href="/"
                     className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
                   >
-                    <Cog6ToothIcon
+                    <HomeModernIcon
                       className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
                       aria-hidden="true"
                     />
-                    Settings
+                    Go Home
                   </Link>
                 </li>
               </ul>
