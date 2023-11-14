@@ -1,8 +1,10 @@
 // import AcmeLogo from "@/app/ui/acme-logo";
 // import styles from "@/app/ui/home.module.css";
-import { lusitana, roboto, signika } from "@/app/ui/fonts";
+import { roboto, signika } from "@/components/fonts";
+import Navbar from "@/components/navbar";
 import Image from "next/image";
-import Navbar from "./ui/navbar";
+
+import { Button } from "@/components/ui/button";
 
 import Link from "next/link";
 export default function Page() {
@@ -28,12 +30,9 @@ export default function Page() {
             Climate, your business becomes a symbol of positive change.
           </p>
         </div>
-        <Link
-          href="/login"
-          className="flex items-center gap-4 self-center rounded-lg bg-gray-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 md:text-base"
-        >
-          <span>Let&lsquo;s Start</span>
-        </Link>
+        <Button asChild>
+          <Link href="/login">Get Start</Link>
+        </Button>
 
         <div className="h-fit">
           <Image
