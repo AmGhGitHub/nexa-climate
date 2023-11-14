@@ -18,7 +18,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment, useState } from "react";
-import NexaLogo from "../ui/logo";
+import NexaLogo from "@/components/logo";
 
 const navigation = [
   {

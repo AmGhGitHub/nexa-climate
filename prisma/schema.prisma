@@ -19,3 +19,15 @@ model st_combus_quant_based_emis {
   n2o_emis_value Float
   n2o_emis_unit  String @db.VarChar(250)
 }
+
+model st_combus_hc_based_emis {
+  id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fuel_type      String @db.VarChar(250)
+  fuel_sub_type  String @db.VarChar(250)
+  co2_emis_value Float
+  co2_emis_unit  String @db.VarChar(250)
+  ch4_emis_value Float
+  ch4_emis_unit  String @db.VarChar(250)
+  n2o_emis_value Float
+  n2o_emis_unit  String @db.VarChar(250)
+}

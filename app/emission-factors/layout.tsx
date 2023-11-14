@@ -26,17 +26,17 @@ const navigation = [
     href: "/emission-factors/st-combus",
     icon: HomeIcon,
   },
-  { name: "Scope 1", href: "/calculator/scope1", icon: UsersIcon },
-  {
-    name: "Scope 2",
-    href: "/calculator/scope2",
-    icon: FolderIcon,
-  },
-  {
-    name: "Scope 3",
-    href: "/calculator/scope3",
-    icon: CalendarIcon,
-  },
+  // { name: "Scope 1", href: "/emission-factors", icon: UsersIcon },
+  // {
+  //   name: "Scope 2",
+  //   href: "/emission-factors",
+  //   icon: FolderIcon,
+  // },
+  // {
+  //   name: "Scope 3",
+  //   href: "/emission-factors",
+  //   icon: CalendarIcon,
+  // },
 ];
 
 const userNavigation = [
