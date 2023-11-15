@@ -1,9 +1,8 @@
-import Scope1Form from "@/components/scope-emis/create-form";
+import Scope1Form from "@/components/ui/scope-emis/create-form";
 import prisma from "@/prisma/client";
 // import Breadcrumbs from "@/app/ui/invoices/breadcrumbs";
 // import { fetchCustomers } from "@/app/lib/data";
 import { sql } from "@vercel/postgres";
-
 
 export default async function Page() {
   //   const customers = await fetchCustomers();
