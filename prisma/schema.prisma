@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection without a connection pool
+  url       = env("PG_PRISMA_URL")
+  directUrl = env("PG_URL_NON_POOLING") // uses a direct connection without a connection pool
 }
 
 model st_combus_heat_content {
@@ -38,4 +38,9 @@ model st_combus_hc_based_emis {
   ch4_emis_unit  String @db.VarChar(250)
   n2o_emis_value Float
   n2o_emis_unit  String @db.VarChar(250)
+}
+
+model scope1_emission_sources {
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  source String @db.VarChar(500)
 }

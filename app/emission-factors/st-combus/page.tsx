@@ -6,7 +6,7 @@ import {
 } from "./columns";
 import { DataTable } from "@/components/data-table/emis-factors-data-table";
 
-export default async function Example() {
+export default async function StationaryCombustion() {
   const st_combus_quant_based =
     await prisma.st_combus_quant_based_emis.findMany({
       orderBy: [{ fuel_type: "asc" }, { fuel_sub_type: "asc" }],
