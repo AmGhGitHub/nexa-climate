@@ -1,6 +1,13 @@
 "use client";
+import { getFuelsAndFuelSubTypes } from "@/lib/FetchData";
 
 import { useState, useEffect } from "react";
+import axios from "axios";
+
+const fetchData = async () => {
+  const { fuels, fuel_sub_types } = await axios.get("/api/emf");
+  console.log(fuels);
+};
 
 import { scope1_emission_sources } from "@prisma/client";
 // import { CustomerField } from "@/app/lib/definitions";
@@ -12,30 +19,6 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import prisma from "@/prisma/client";
-
-const getFuelsAndFuelSubTypes = async () => {
-  const fuelsResult = await prisma.st_combus_hc_based_emis.findMany({
-    distinct: ["fuel_type"],
-    select: {
-      fuel_type: true,
-    },
-  });
-  const fuelSubTypesResult = await prisma.st_combus_hc_based_emis.findMany({
-    distinct: ["fuel_sub_type"],
-    select: {
-      fuel_sub_type: true,
-    },
-  });
-
-  // Extract only the strings
-  const fuels = fuelsResult.map((fuel) => fuel.fuel_type);
-  const fuel_sub_types = fuelSubTypesResult.map(
-    (fuelSubType) => fuelSubType.fuel_sub_type
-  );
-
-  return { fuels, fuel_sub_types };
-};
 
 export default function Scope1Form({
   emis_srcs,
@@ -44,12 +27,12 @@ export default function Scope1Form({
 }) {
   const [selectedSource, setSelectedSource] = useState("");
   const [fuelTypes, setFuelTypes] = useState<string[]>([]);
-  console.log(fuelTypes);
+  // console.log(fuelTypes);
   const [fuelSubTypes, setFuelSubTypes] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const { fuels, fuel_sub_types } = await getFuelsAndFuelSubTypes();
+      const { fuels, fuel_sub_types } = await axios.get("/api/emf");
       setFuelTypes(fuels);
       setFuelSubTypes(fuel_sub_types);
     };
