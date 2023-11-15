@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import { scope1_emission_sources } from "@prisma/client";
 // import { CustomerField } from "@/app/lib/definitions";
 import { Button } from "@/components/ui/button";
@@ -10,39 +12,114 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import prisma from "@/prisma/client";
+
+const getFuelsAndFuelSubTypes = async () => {
+  const fuelsResult = await prisma.st_combus_hc_based_emis.findMany({
+    distinct: ["fuel_type"],
+    select: {
+      fuel_type: true,
+    },
+  });
+  const fuelSubTypesResult = await prisma.st_combus_hc_based_emis.findMany({
+    distinct: ["fuel_sub_type"],
+    select: {
+      fuel_sub_type: true,
+    },
+  });
+
+  // Extract only the strings
+  const fuels = fuelsResult.map((fuel) => fuel.fuel_type);
+  const fuel_sub_types = fuelSubTypesResult.map(
+    (fuelSubType) => fuelSubType.fuel_sub_type
+  );
+
+  return { fuels, fuel_sub_types };
+};
 
 export default function Scope1Form({
-  customers,
+  emis_srcs,
 }: {
-  customers: scope1_emission_sources[];
+  emis_srcs: scope1_emission_sources[];
 }) {
+  const [selectedSource, setSelectedSource] = useState("");
+  const [fuelTypes, setFuelTypes] = useState<string[]>([]);
+  console.log(fuelTypes);
+  const [fuelSubTypes, setFuelSubTypes] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { fuels, fuel_sub_types } = await getFuelsAndFuelSubTypes();
+      setFuelTypes(fuels);
+      setFuelSubTypes(fuel_sub_types);
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <form>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Choose customer
+            Choose a source
           </label>
           <div className="relative">
             <select
-              id="customer"
+              id="emis_src"
               name="customerId"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
+              onChange={(e) => {
+                setSelectedSource(e.target.value);
+                console.log(e.target.value);
+              }}
             >
               <option value="" disabled>
-                Select a customer
+                Select a source
               </option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.source}
+              {emis_srcs.map((emis_src) => (
+                <option key={emis_src.id} value={emis_src.source}>
+                  {emis_src.source}
                 </option>
               ))}
             </select>
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
           </div>
         </div>
+
+        {selectedSource === "Stationary Combustion" && (
+          <>
+            {/* Fuel Type Select */}
+            <div className="mb-4">
+              <label
+                htmlFor="fuelType"
+                className="mb-2 block text-sm font-medium"
+              >
+                Choose a Fuel Type
+              </label>
+              <select
+                id="fuelType"
+                name="fuelType"
+                className="block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  Select Fuel Type
+                </option>
+                {fuelTypes.map((fuel, index) => (
+                  <option key={index} value={fuel}>
+                    {fuel}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Fuel Subtype Select */}
+            <div className="mb-4">{/* Select for Fuel Subtype */}</div>
+          </>
+        )}
 
         {/* Invoice Amount */}
         <div className="mb-4">

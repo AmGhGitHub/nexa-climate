@@ -15,6 +15,7 @@ export default async function Page() {
 
   const aa = await prisma.scope1_emission_sources.findMany({
     distinct: ["source"],
+    // orderBy: { source: "desc" },
   });
 
   return (
@@ -29,7 +30,7 @@ export default async function Page() {
           },
         ]}
       /> */}
-      <Scope1Form customers={aa} />
+      <Scope1Form emis_srcs={aa} />
     </main>
   );
 }
