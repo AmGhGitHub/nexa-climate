@@ -5,7 +5,7 @@ const NexaLogo = () => {
   return (
     <Link href="/" className="-m-1.5 p-1.5">
       <span className="sr-only">Nexa Climate</span>
-      <Image width={120} height={30} src="/nexa-logo.png" alt="" />
+      <Image width={120} height={30} src="/nexa-logo.png" alt="d" />
     </Link>
   );
 };

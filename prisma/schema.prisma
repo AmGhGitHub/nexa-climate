@@ -44,3 +44,11 @@ model scope1_emission_sources {
   id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   source String @db.VarChar(500)
 }
+
+model scope1_emission_summary {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  report_date DateTime
+  CO2_emis    Float
+  CH4_emis    Float
+  N2O_emis    Float
+}
