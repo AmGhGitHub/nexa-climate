@@ -3,14 +3,14 @@
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { scope1_emission_sources } from "@prisma/client";
 // import { CustomerField } from "@/app/lib/definitions";
 import { Button } from "@/components/ui/button";
 
-import Link from "next/link";
 import axios from "axios";
+import Link from "next/link";
 
 interface FuelTypeProps {
   id: string;
