@@ -69,7 +69,7 @@ export default function Scope1Form({
 
   return (
     <>
-      <h1 className="mb-5 text-lg text-orange-800">
+      <h1 className="mb-5 text-lg font-bold text-amber-600">
         Add emission element for scope 1
       </h1>
       <form>
