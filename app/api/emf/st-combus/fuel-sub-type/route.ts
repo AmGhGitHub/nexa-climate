@@ -6,19 +6,19 @@ export async function GET(req: NextRequest) {
     const emisCalculationBase = req.nextUrl.searchParams.get(
       "emisCalculationBase"
     );
-    const fuelType = req.nextUrl.searchParams.get("fuelType");
+    const selectedFuelType = req.nextUrl.searchParams.get("selectedFuelType");
 
     // Check if fuelType is not null before proceeding
-    if (emisCalculationBase === "hc" && fuelType) {
-      const fuelSubType = await prisma.st_combus_hc_based_emis.findMany({
+    if (emisCalculationBase === "hc" && selectedFuelType) {
+      const fuelSubTypes = await prisma.st_combus_hc_based_emis.findMany({
         distinct: ["fuel_sub_type"],
-        where: { fuel_type: fuelType }, // fuelType is guaranteed to be a string here
+        where: { fuel_type: selectedFuelType }, // fuelType is guaranteed to be a string here
         select: {
           id: true,
           fuel_sub_type: true,
         },
       });
-      return NextResponse.json({ fuelSubType });
+      return NextResponse.json({ fuelSubTypes });
     }
 
     // Handle cases where emisCalculationBase is not 'hc' or fuelType is null

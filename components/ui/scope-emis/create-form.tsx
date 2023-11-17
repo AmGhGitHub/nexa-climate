@@ -31,6 +31,7 @@ export default function Scope1Form({
   const [fuelTypes, setFuelTypes] = useState<FuelTypeProps[]>([]);
   const [fuelSubTypes, setFuelSubTypes] = useState<FuelSubTypeProps[]>([]);
   const [emisCalculationBase, setEmisCalculationBase] = useState("hc");
+  const [selectedFuelType, setSelectedFuelType] = useState("");
 
   useEffect(() => {
     if (selectedSource === "Stationary Combustion") {
@@ -49,17 +50,22 @@ export default function Scope1Form({
     }
   }, [selectedSource, emisCalculationBase]);
 
-  // useEffect(() => {
-  //   if (selectedSource === "Stationary Combustion") {
-  //     const fetchData = async () => {
-  //       const res = await axios.get("/api/emf/st-combus/fuel-sub-type");
-  //       const { fue } = await res.data;
-  //       setFuelTypes(fuelType);
-  //     };
+  useEffect(() => {
+    if (selectedSource === "Stationary Combustion") {
+      const fetchData = async () => {
+        const res = await axios.get("/api/emf/st-combus/fuel-sub-type", {
+          params: {
+            emisCalculationBase,
+            selectedFuelType,
+          },
+        });
+        const { fuelSubTypes } = await res.data;
+        setFuelSubTypes(fuelSubTypes);
+      };
 
-  //     fetchData();
-  //   }
-  // }, [fuelTypes]);
+      fetchData();
+    }
+  }, [selectedFuelType]);
 
   return (
     <>
@@ -84,7 +90,6 @@ export default function Scope1Form({
                 defaultValue=""
                 onChange={(e) => {
                   setSelectedSource(e.target.value);
-                  console.log(e.target.value);
                 }}
               >
                 <option value="" disabled>
@@ -138,6 +143,7 @@ export default function Scope1Form({
                   name="fuelType"
                   className="block w-full rounded-md border border-gray-200 py-2 pl-2 text-sm outline-2 placeholder:text-gray-500"
                   defaultValue=""
+                  onChange={(e) => setSelectedFuelType(e.target.value)}
                 >
                   <option value="" disabled>
                     Select Fuel Type
