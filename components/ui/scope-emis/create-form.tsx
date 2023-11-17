@@ -180,6 +180,31 @@ export default function Scope1Form({
                   ))}
                 </select>
               </div>
+
+              {/* Fuel Subtype Select */}
+              <div className="mb-4">
+                <label
+                  htmlFor="fuelType"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  Unit
+                </label>
+                <select
+                  id="unit"
+                  name="unit"
+                  className="block w-full rounded-md border border-gray-200 py-2 pl-2 text-sm outline-2 placeholder:text-gray-500"
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Select Unit
+                  </option>
+                  {/* {fuelSubTypes.map((fuel) => (
+                    <option key={fuel.id} value={fuel.fuel_sub_type}>
+                      {fuel.fuel_sub_type}
+                    </option>
+                  ))} */}
+                </select>
+              </div>
             </>
           )}
 
