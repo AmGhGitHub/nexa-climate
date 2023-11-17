@@ -5,18 +5,12 @@ import prisma from "@/prisma/client";
 import { sql } from "@vercel/postgres";
 
 export default async function Page() {
-  //   const customers = await fetchCustomers();
-  // const scope1_emission_src =
-  //   await sql`SELECT * FROM scope1_emission_sources`;
-
-  // //   const s= await prisma.$queryRaw`SELECT * FROM scope1_emission_sources`;
-
-  // console.log(scope1_emission_src);
-
-  const aa = await prisma.scope1_emission_sources.findMany({
-    distinct: ["source"],
-    // orderBy: { source: "desc" },
-  });
+  const scope1_emission_sources = await prisma.scope1_emission_sources.findMany(
+    {
+      distinct: ["source"],
+      // orderBy: { source: "asc" },
+    }
+  );
 
   return (
     <main>
@@ -30,7 +24,7 @@ export default async function Page() {
           },
         ]}
       /> */}
-      <Scope1Form emis_srcs={aa} />
+      <Scope1Form emis_srcs={scope1_emission_sources} />
     </main>
   );
 }

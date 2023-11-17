@@ -1,19 +1,16 @@
 "use client";
-import { getFuelsAndFuelSubTypes } from "@/lib/FetchData";
+
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
 
 import { scope1_emission_sources } from "@prisma/client";
 // import { CustomerField } from "@/app/lib/definitions";
 import { Button } from "@/components/ui/button";
-import {
-  CheckIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  UserCircleIcon,
-} from "@heroicons/react/24/outline";
+
 import Link from "next/link";
+import axios from "axios";
 
 interface FuelTypeProps {
   id: string;
@@ -33,19 +30,36 @@ export default function Scope1Form({
   const [selectedSource, setSelectedSource] = useState("");
   const [fuelTypes, setFuelTypes] = useState<FuelTypeProps[]>([]);
   const [fuelSubTypes, setFuelSubTypes] = useState<FuelSubTypeProps[]>([]);
+  const [emisCalculationBase, setEmisCalculationBase] = useState("hc");
 
   useEffect(() => {
     if (selectedSource === "Stationary Combustion") {
       const fetchData = async () => {
-        const res = await axios.get("/api/emf");
-        const { fuelType, fuelSubType } = await res.data;
+        const res = await axios.get("/api/emf/st-combus", {
+          params: {
+            emisCalculationBase,
+          },
+        });
+        const { fuelType } = await res.data;
+        console.log(fuelType);
         setFuelTypes(fuelType);
-        setFuelSubTypes(fuelSubType);
       };
 
       fetchData();
     }
-  }, [selectedSource]);
+  }, [selectedSource, emisCalculationBase]);
+
+  // useEffect(() => {
+  //   if (selectedSource === "Stationary Combustion") {
+  //     const fetchData = async () => {
+  //       const res = await axios.get("/api/emf/st-combus/fuel-sub-type");
+  //       const { fue } = await res.data;
+  //       setFuelTypes(fuelType);
+  //     };
+
+  //     fetchData();
+  //   }
+  // }, [fuelTypes]);
 
   return (
     <>
@@ -88,45 +102,29 @@ export default function Scope1Form({
 
           {selectedSource === "Stationary Combustion" && (
             <>
-              <fieldset>
-                <legend className="mb-2 block text-sm font-medium">
-                  Calculation Based On
-                </legend>
-                <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
-                  <div className="flex gap-4">
-                    <div className="flex items-center">
-                      <input
-                        id="hc"
-                        name="status"
-                        type="radio"
-                        value="hc"
-                        className="h-4 w-4 border-gray-300 bg-gray-100 text-gray-600 focus:ring-2 focus:ring-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-gray-600"
-                      />
-                      <label
-                        htmlFor="hc"
-                        className="ml-2 flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
-                      >
-                        Heat Content
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        id="quantity"
-                        name="status"
-                        type="radio"
-                        value="quantity"
-                        className="h-4 w-4 border-gray-300 bg-gray-100 text-gray-600 focus:ring-2 focus:ring-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-gray-600"
-                      />
-                      <label
-                        htmlFor="quantity"
-                        className="ml-2 flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
-                      >
-                        Quantity
-                      </label>
-                    </div>
+              <label
+                htmlFor="customer"
+                className="mb-2 block text-sm font-medium"
+              >
+                Base of Calculations
+              </label>
+              <div className="bg-white p-3 rounded-lg">
+                <RadioGroup
+                  defaultValue={emisCalculationBase}
+                  orientation="horizontal"
+                  onValueChange={(e) => setEmisCalculationBase(e)}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="hc" id="option-one" />
+                    <Label htmlFor="option-one">Heat Content</Label>
                   </div>
-                </div>
-              </fieldset>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="quantity" id="option-two" />
+                    <Label htmlFor="option-two">Quantity</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
               {/* Fuel Type Select */}
               <div className="my-4">
                 <label
