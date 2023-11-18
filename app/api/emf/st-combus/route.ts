@@ -1,10 +1,15 @@
 import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   const emisCalculationBase = req.nextUrl.searchParams.get(
     "emisCalculationBase"
   );
+  console.log(emisCalculationBase);
+  // const body = await req.json();
+  // console.log(body);
 
   let fuelType = null;
   if (emisCalculationBase === "hc") {
