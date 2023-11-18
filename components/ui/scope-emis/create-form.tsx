@@ -50,21 +50,19 @@ export default function Scope1Form({
   }, [selectedSource, emisCalculationBase]);
 
   useEffect(() => {
-    if (selectedSource === "Stationary Combustion") {
-      const fetchData = async () => {
-        const res = await axios.get("/api/emf/st-combus/fuel-sub-type", {
-          params: {
-            emisCalculationBase,
-            selectedFuelType,
-          },
-        });
-        const { fuelSubTypes } = await res.data;
-        setFuelSubTypes(fuelSubTypes);
-      };
+    const fetchData = async () => {
+      const res = await axios.get("/api/emf/st-combus/fuel-sub-type", {
+        params: {
+          emisCalculationBase,
+          selectedFuelType,
+        },
+      });
+      const { fuelSubTypes } = await res.data;
+      setFuelSubTypes(fuelSubTypes);
+    };
 
-      fetchData();
-    }
-  }, [selectedFuelType, selectedSource, emisCalculationBase]);
+    fetchData();
+  }, [selectedFuelType, emisCalculationBase]);
 
   return (
     <>
@@ -116,7 +114,10 @@ export default function Scope1Form({
                 <RadioGroup
                   defaultValue={emisCalculationBase}
                   orientation="horizontal"
-                  onValueChange={(e) => setEmisCalculationBase(e)}
+                  onValueChange={(e) => {
+                    setEmisCalculationBase(e);
+                    setFuelTypes([]);
+                  }}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="hc" id="option-one" />
@@ -147,11 +148,12 @@ export default function Scope1Form({
                   <option value="" disabled>
                     Select Fuel Type
                   </option>
-                  {fuelTypes.map((fuel) => (
-                    <option key={fuel.id} value={fuel.fuel_type}>
-                      {fuel.fuel_type}
-                    </option>
-                  ))}
+                  {fuelTypes &&
+                    fuelTypes.map((fuel) => (
+                      <option key={fuel.id} value={fuel.fuel_type}>
+                        {fuel.fuel_type}
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -172,11 +174,12 @@ export default function Scope1Form({
                   <option value="" disabled>
                     Select Fuel Sub Type
                   </option>
-                  {fuelSubTypes.map((fuel) => (
-                    <option key={fuel.id} value={fuel.fuel_sub_type}>
-                      {fuel.fuel_sub_type}
-                    </option>
-                  ))}
+                  {fuelSubTypes &&
+                    fuelSubTypes.map((fuel) => (
+                      <option key={fuel.id} value={fuel.fuel_sub_type}>
+                        {fuel.fuel_sub_type}
+                      </option>
+                    ))}
                 </select>
               </div>
 
