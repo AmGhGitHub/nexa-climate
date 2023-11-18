@@ -42,7 +42,6 @@ export default function Scope1Form({
           },
         });
         const { fuelType } = await res.data;
-        console.log(fuelType);
         setFuelTypes(fuelType);
       };
 
@@ -65,7 +64,7 @@ export default function Scope1Form({
 
       fetchData();
     }
-  }, [selectedFuelType]);
+  }, [selectedFuelType, selectedSource, emisCalculationBase]);
 
   return (
     <>

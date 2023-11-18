@@ -7,9 +7,6 @@ export async function GET(req: NextRequest) {
   const emisCalculationBase = req.nextUrl.searchParams.get(
     "emisCalculationBase"
   );
-  console.log(emisCalculationBase);
-  // const body = await req.json();
-  // console.log(body);
 
   let fuelType = null;
   if (emisCalculationBase === "hc") {
