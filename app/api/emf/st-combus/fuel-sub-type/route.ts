@@ -24,6 +24,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ fuelSubTypes });
     }
 
+    if (emisCalculationBase === "quantity" && selectedFuelType) {
+      const fuelSubTypes = await prisma.st_combus_quant_based_emis.findMany({
+        distinct: ["fuel_sub_type"],
+        where: { fuel_type: selectedFuelType }, // fuelType is guaranteed to be a string here
+        select: {
+          id: true,
+          fuel_sub_type: true,
+        },
+      });
+      return NextResponse.json({ fuelSubTypes });
+    }
+
     // Handle cases where emisCalculationBase is not 'hc' or fuelType is null
     return NextResponse.json({ message: "Invalid parameters" });
   } catch (error) {
