@@ -43,6 +43,9 @@ const formSchema = z.object({
   recordDate: z.date({
     required_error: "A date of record is required.",
   }),
+  emisSource: z.string().min(4, {
+    message: "A emission source is required.",
+  }),
   emisCalculationBase: z.enum(["hc", "quantity"], {
     required_error: "A base for calculation is required.",
   }),
@@ -132,31 +135,6 @@ export default function ProfileForm({
     fetchData();
   }, [form.watch("emisCalculationBase"), form.watch("fuelType")]);
 
-  // useEffect(() => {
-  //   const emisCalculationBase = form.watch("emisCalculationBase");
-  //   const selectedFuelType = form.watch("fuelType");
-
-  //   const fetchData = async () => {
-  //     const res = await axios.get("/api/emf/st-combus/fuel-sub-type", {
-  //       params: {
-  //         emisCalculationBase,
-  //         selectedFuelType,
-  //       },
-  //     });
-  //     const { fuelSubTypes, units } = await res.data;
-  //     // console.log(fuelSubTypes);
-  //     // console.log(units);
-  //     setFuelSubTypes(fuelSubTypes);
-  //     setConsumpUnits(units);
-  //   };
-
-  //   fetchData();
-  // }, [
-  //   form.watch("emisCalculationBase"),
-  //   form.watch("fuelType"),
-  //   form.watch("fuelSubType"),
-  // ]);
-
   return (
     <>
       <h1 className="mb-5 text-xl text-teal-700 font-semibold">
@@ -236,7 +214,7 @@ export default function ProfileForm({
             )}
           />
           {form.watch("emisSource") === "Stationary Combustion" && (
-            <div className="flex flex-col flex-grow lg:flex-row">
+            <div className="flex flex-col flex-grow md:flex-row">
               <div className="flex flex-grow md:basis-1/4">
                 <FormField
                   control={form.control}
