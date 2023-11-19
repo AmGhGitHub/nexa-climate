@@ -24,9 +24,9 @@ const Page = async () => {
             <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
               Report Date
             </th>
-            {/* <th scope="col" className="px-3 py-5 font-medium">
+            <th scope="col" className="px-3 py-5 font-medium">
               Emission Source
-            </th> */}
+            </th>
             <th scope="col" className="px-3 py-5 font-medium">
               CO2 Emission (tCO2)
             </th>
@@ -61,6 +61,9 @@ const Page = async () => {
                   /> */}
                   <p>{formatDate(data.report_date)}</p>
                 </div>
+              </td>
+              <td className="whitespace-nowrap px-3 py-3">
+                {data.emission_source}
               </td>
               <td className="whitespace-nowrap px-3 py-3">{data.CO2_emis}</td>
               <td className="whitespace-nowrap px-3 py-3">{data.CH4_emis}</td>
