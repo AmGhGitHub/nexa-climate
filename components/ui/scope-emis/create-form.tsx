@@ -2,6 +2,7 @@
 import axios from "axios";
 
 import { scope1_emission_sources } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 import { Calendar } from "@/components/ui/calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,7 +41,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 
 const formSchema = z.object({
-  recordDate: z.date({
+  reportDate: z.date({
     required_error: "A date of record is required.",
   }),
   emisSource: z.string().min(4, {
@@ -79,7 +80,7 @@ export default function ProfileForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      recordDate: new Date(),
+      reportDate: new Date(),
       // emisSource: "Stationary Combustion",
       emisCalculationBase: "hc",
       fuelType: "Natural Gas",
@@ -91,7 +92,11 @@ export default function ProfileForm({
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    axios.post("/api/emf/st-combus/fuel-sub-type", values).then((res) => {
+      console.log(res.data);
+      toast({ title: "Emission entry created successfully!" });
+      window.location.href = "/calculator/scope1";
+    });
   }
 
   const [fuelTypes, setFuelTypes] = useState<FuelTypeProps[]>([]);
@@ -147,7 +152,7 @@ export default function ProfileForm({
         >
           <FormField
             control={form.control}
-            name="recordDate"
+            name="reportDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel className="font-bold">Record Date</FormLabel>
@@ -261,7 +266,9 @@ export default function ProfileForm({
                     <FormItem className="min-w-[300px]">
                       <FormLabel className="font-bold">Fuel Type:</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                        }}
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -290,7 +297,9 @@ export default function ProfileForm({
                     <FormItem className="min-w-[300px]">
                       <FormLabel className="font-bold">Fuel SubType:</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                        }}
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -318,12 +327,14 @@ export default function ProfileForm({
                 {consumpUnits && (
                   <FormField
                     control={form.control}
-                    name="fuelSubType"
+                    name="unit"
                     render={({ field }) => (
                       <FormItem className="min-w-[300px]">
                         <FormLabel className="font-bold">Unit:</FormLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                          }}
                           defaultValue={field.value}
                         >
                           <FormControl>
@@ -354,7 +365,11 @@ export default function ProfileForm({
               <FormItem>
                 <FormLabel className="font-bold">Consumption Amount:</FormLabel>
                 <FormControl>
-                  <Input placeholder="1000" {...field} />
+                  <Input
+                    {...field}
+                    type="number"
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
