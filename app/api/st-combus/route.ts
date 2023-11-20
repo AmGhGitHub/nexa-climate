@@ -67,8 +67,20 @@ export async function POST(req: NextRequest) {
     const unitType = unit_specs?.unit_type;
     const base_unit = unit_specs?.base_unit;
     const converted_amount = convertUnit(amount, unit, base_unit, unitType);
-    console.log(amount, unit, base_unit, unitType);
-    console.log("converted_amount", converted_amount);
+    // console.log(amount, unit, base_unit, unitType);
+    // console.log("converted_amount", converted_amount);
+
+    // const new_emis = {
+    //   report_date: reportDate,
+    //   emission_source: emisSource,
+    //   CO2_emis: emisFactors.co2_emis_value * 1,
+    //   CH4_emis: emisFactors.ch4_emis_value * 25,
+    //   N2O_emis: emisFactors.n2o_emis_value * 298,
+    // };
+    // const res = await prisma.scope1_emission_summary.create({
+    //   data: new_emis,
+    // });
+    // return NextResponse.json(res, { status: 201 });
 
     return NextResponse.json(unit_specs, { status: 201 });
   } catch (error) {
