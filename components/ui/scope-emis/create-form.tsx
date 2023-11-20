@@ -2,7 +2,6 @@
 import axios from "axios";
 
 import { scope1_emission_sources } from "@prisma/client";
-import { useRouter } from "next/navigation";
 
 import { Calendar } from "@/components/ui/calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +20,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -30,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 
 import {
   Popover,
@@ -38,7 +36,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
-import { useState, useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 const formSchema = z.object({
   reportDate: z.date({
@@ -47,14 +45,48 @@ const formSchema = z.object({
   emisSource: z.string().min(4, {
     message: "A emission source is required.",
   }),
-  emisCalculationBase: z.enum(["hc", "quantity"], {
-    required_error: "A base for calculation is required.",
-  }),
   fuelType: z.string().min(4, { message: "A fuel type is required." }),
   fuelSubType: z.string().min(4, { message: "A fuel sub type is required." }),
   unit: z.string().min(4, { message: "A unit is required." }),
   amount: z.number().min(0, { message: "An amount is required." }),
 });
+
+const fetchFuelTypes = async (emisSource: string) => {
+  if (emisSource !== "Stationary Combustion") return [];
+  try {
+    const { data } = await axios.get("/api/st-combus?search=fuel-type");
+    return data.res || [];
+  } catch (error) {
+    console.error("Error fetching fuel types:", error);
+    return [];
+  }
+};
+
+const fetchFuelSubTypes = async (fuelType: string) => {
+  if (!fuelType) return [];
+  try {
+    const { data } = await axios.get(
+      `/api/st-combus?search=fuel-sub-type&fuel-type=${fuelType}`
+    );
+    return data.res || [];
+  } catch (error) {
+    console.error("Error fetching fuel subtypes:", error);
+    return [];
+  }
+};
+
+const fetchConsumpUnits = async (fuelType: string, fuelSubType: string) => {
+  if (!fuelType || !fuelSubType) return [];
+  try {
+    const { data } = await axios.get(
+      `/api/st-combus?search=unit-type&fuel-type=${fuelType}&fuel-sub-type=${fuelSubType}`
+    );
+    return data.res || [];
+  } catch (error) {
+    console.error("Error fetching consumption units:", error);
+    return [];
+  }
+};
 
 interface FuelTypeProps {
   id: string;
@@ -64,12 +96,11 @@ interface FuelTypeProps {
 interface FuelSubTypeProps {
   id: string;
   fuel_sub_type: string;
-  // per_unit: string;
 }
 
-interface ConsumpUnitProps {
+interface LegitUnitsProps {
   id: string;
-  per_unit: string;
+  legit_unit: string;
 }
 
 export default function ProfileForm({
@@ -80,65 +111,42 @@ export default function ProfileForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      reportDate: new Date(),
-      // emisSource: "Stationary Combustion",
-      emisCalculationBase: "hc",
-      fuelType: "Natural Gas",
-      fuelSubType: "Pipeline",
-      unit: "mmBTU/short-ton",
       amount: 1000,
     },
   });
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    axios.post("/api/emf/st-combus/fuel-sub-type", values).then((res) => {
-      console.log(res.data);
-      toast({ title: "Emission entry created successfully!" });
-      window.location.href = "/calculator/scope1";
-    });
-  }
-
   const [fuelTypes, setFuelTypes] = useState<FuelTypeProps[]>([]);
   const [fuelSubTypes, setFuelSubTypes] = useState<FuelSubTypeProps[]>([]);
-  const [consumpUnits, setConsumpUnits] = useState<ConsumpUnitProps[]>([]);
+  const [consumpUnits, setConsumpUnits] = useState<LegitUnitsProps[]>([]);
 
   useEffect(() => {
-    if (form.watch("emisSource") === "Stationary Combustion") {
-      const emisCalcBase = form.watch("emisCalculationBase");
-      const fetchData = async () => {
-        const res = await axios.get("/api/emf/st-combus", {
-          params: {
-            emisCalculationBase: emisCalcBase,
-          },
-        });
-        const { fuelType } = await res.data;
-        setFuelTypes(fuelType);
-      };
-
-      fetchData();
-    }
-  }, [form.watch("emisCalculationBase"), form.watch("emisSource")]);
+    const emisSource = form.watch("emisSource");
+    fetchFuelTypes(emisSource).then(setFuelTypes);
+  }, [form.watch("emisSource")]);
 
   useEffect(() => {
-    const emisCalculationBase = form.watch("emisCalculationBase");
-    const selectedFuelType = form.watch("fuelType");
+    const fuelType = form.watch("fuelType");
+    fetchFuelSubTypes(fuelType).then(setFuelSubTypes);
+    setConsumpUnits([]);
+  }, [form.watch("fuelType")]);
 
-    const fetchData = async () => {
-      const res = await axios.get("/api/emf/st-combus/fuel-sub-type", {
-        params: {
-          emisCalculationBase,
-          selectedFuelType,
-        },
-      });
-      const { fuelSubTypes, units } = await res.data;
+  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
+    // console.log(values);
+    try {
+      const res = await axios.post("/api/st-combus", values);
       // console.log(res.data);
-      setFuelSubTypes(fuelSubTypes);
-      setConsumpUnits(units);
-    };
+      toast({ title: "Emission entry created successfully!" });
+      window.location.href = "/calculator/scope1";
+    } catch (error) {
+      console.error("Submission error:", error);
+    }
+  }, []);
 
-    fetchData();
-  }, [form.watch("emisCalculationBase"), form.watch("fuelType")]);
+  useEffect(() => {
+    const fuelType = form.watch("fuelType");
+    const fuelSubType = form.watch("fuelSubType");
+    fetchConsumpUnits(fuelType, fuelSubType).then(setConsumpUnits);
+  }, [form.watch("fuelSubType"), form.watch("fuelType")]);
 
   return (
     <>
@@ -148,122 +156,93 @@ export default function ProfileForm({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 bg-gray-50 border-gray-300 border-2 rounded-lg p-4"
+          className="space-y-5 bg-gray-50 border-gray-300 border-2 rounded-lg p-4"
         >
-          <FormField
-            control={form.control}
-            name="reportDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel className="font-bold">Record Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "yyyy-MM-dd")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="emisSource"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-bold">Emission Source:</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Source" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {emis_srcs.map((emis_src) => (
-                      <SelectItem key={emis_src.id} value={emis_src.source}>
-                        {emis_src.source}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {form.watch("emisSource") === "Stationary Combustion" && (
-            <div className="flex flex-col flex-grow md:flex-row">
-              <div className="flex flex-grow md:basis-1/4">
-                <FormField
-                  control={form.control}
-                  name="emisCalculationBase"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel className="font-bold">
-                        Base of Emission Calculations:
-                      </FormLabel>
+          <div className="flex flex-col md:flex-row md:space-x-10">
+            <div className="flex flex-col mb-4 md:mb-0 md:mr-4">
+              <FormField
+                control={form.control}
+                name="reportDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="font-bold">Record Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "yyyy-MM-dd")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex flex-col w-[240px]">
+              <FormField
+                control={form.control}
+                name="emisSource"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="font-bold">
+                      Emission Source:
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex flex-row space-y-1"
-                        >
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="hc" />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              Heat Content
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="quantity" />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              Quantity
-                            </FormLabel>
-                          </FormItem>
-                        </RadioGroup>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Source" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="flex flex-grow md:basis-1/4">
+                      <SelectContent>
+                        {emis_srcs.map((emis_src) => (
+                          <SelectItem key={emis_src.id} value={emis_src.source}>
+                            {emis_src.source}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {form.watch("emisSource") === "Stationary Combustion" && (
+            <div className="flex flex-col md:flex-row md:space-x-10">
+              <div className="flex flex-col w-[240px]">
                 <FormField
                   control={form.control}
                   name="fuelType"
                   render={({ field }) => (
-                    <FormItem className="min-w-[300px]">
+                    <FormItem className="flex flex-col">
                       <FormLabel className="font-bold">Fuel Type:</FormLabel>
                       <Select
                         onValueChange={(value) => {
@@ -289,12 +268,12 @@ export default function ProfileForm({
                   )}
                 />
               </div>
-              <div className="flex flex-grow md:basis-1/4">
+              <div className="flex flex-col w-[240px]">
                 <FormField
                   control={form.control}
                   name="fuelSubType"
                   render={({ field }) => (
-                    <FormItem className="min-w-[300px]">
+                    <FormItem className="flex flex-col">
                       <FormLabel className="font-bold">Fuel SubType:</FormLabel>
                       <Select
                         onValueChange={(value) => {
@@ -323,18 +302,16 @@ export default function ProfileForm({
                   )}
                 />
               </div>
-              <div className="flex flex-grow md:basis-1/4">
+              <div className="flex flex-col w-[240px]">
                 {consumpUnits && (
                   <FormField
                     control={form.control}
                     name="unit"
                     render={({ field }) => (
-                      <FormItem className="min-w-[300px]">
+                      <FormItem className="flex flex-col">
                         <FormLabel className="font-bold">Unit:</FormLabel>
                         <Select
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                          }}
+                          onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
@@ -344,8 +321,8 @@ export default function ProfileForm({
                           </FormControl>
                           <SelectContent>
                             {consumpUnits.map((item) => (
-                              <SelectItem key={item.id} value={item.per_unit}>
-                                {item.per_unit}
+                              <SelectItem key={item.id} value={item.legit_unit}>
+                                {item.legit_unit}
                               </SelectItem>
                             ))}
                           </SelectContent>
