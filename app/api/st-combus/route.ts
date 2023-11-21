@@ -53,14 +53,7 @@ export async function POST(req: NextRequest) {
     await req.json();
 
   try {
-    const {
-      base_unit,
-      unit_type,
-      hc_value_mmbtu_per_base_unit,
-      CO2_emis_kgCO2_per_mmbtu,
-      CH4_emis_grCH4_per_mmbtu,
-      N2O_emis_grN2O_per_mmbtu,
-    } = await prisma.st_combus.findFirst({
+    const results: st_combus = await prisma.st_combus.findFirst({
       where: {
         fuel_type: fuelType,
         fuel_sub_type: fuelSubType,
@@ -74,6 +67,15 @@ export async function POST(req: NextRequest) {
         N2O_emis_grN2O_per_mmbtu: true,
       },
     });
+
+    const {
+      base_unit,
+      unit_type,
+      hc_value_mmbtu_per_base_unit,
+      CO2_emis_kgCO2_per_mmbtu,
+      CH4_emis_grCH4_per_mmbtu,
+      N2O_emis_grN2O_per_mmbtu,
+    } = results;
 
     const value_mmbtu =
       convertUnit(amount, unit, base_unit, unit_type) *
