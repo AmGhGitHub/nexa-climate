@@ -1,13 +1,13 @@
-type Quantity = "mass" | "gas-volume" | "liquid-volume";
+export type IQuantity = "mass" | "gas-volume" | "liquid-volume";
 
 type MassUnits = "kg" | "ton" | "tonne" | "lbm"; // Add other mass units as needed
 type GasVolumeUnits = "m3" | "liter" | "cf" | "mcf" | "mmcf" | "bcf"; // Add other gas volume units as needed
 type LiquidVolumeUnits = "m3" | "bbl" | "gallon" | "liter"; // Add other liquid volume units as needed
 
-type AllUnits = MassUnits | GasVolumeUnits | LiquidVolumeUnits;
+export type IAllLegitUnits = MassUnits | GasVolumeUnits | LiquidVolumeUnits;
 
 type ConversionFactors = {
-  [key in Quantity]: Record<string, number>;
+  [key in IQuantity]: Record<string, number>;
 };
 
 const conversionFactors: ConversionFactors = {
@@ -39,9 +39,9 @@ const conversionFactors: ConversionFactors = {
 // Define your conversion logic here
 export function convertUnit(
   value: number,
-  fromUnit: AllUnits,
-  toUnit: AllUnits,
-  quantity: Quantity
+  fromUnit: IAllLegitUnits,
+  toUnit: IAllLegitUnits,
+  quantity: IQuantity
 ): number {
   const fromFactor = conversionFactors[quantity][fromUnit];
   const toFactor = conversionFactors[quantity][toUnit];

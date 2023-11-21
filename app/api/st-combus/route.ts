@@ -1,8 +1,8 @@
 import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-import { convertUnit } from "@/lib/unitConverter";
+import { convertUnit } from "@/lib/unit-converter";
 import { roundNumber } from "@/lib/utils";
-import { st_combus } from ".prisma/client";
+import { IAllLegitUnits, IQuantity } from "@/lib/unit-converter";
 
 export async function GET(req: NextRequest) {
   const url = req.nextUrl;
@@ -49,11 +49,20 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  interface IResults {
+    hc_value_mmbtu_per_base_unit: number;
+    base_unit: string;
+    unit_type: string;
+    CO2_emis_kgCO2_per_mmbtu: number;
+    CH4_emis_grCH4_per_mmbtu: number;
+    N2O_emis_grN2O_per_mmbtu: number;
+  }
+
   const { amount, reportDate, emisSource, fuelType, fuelSubType, unit } =
     await req.json();
 
   try {
-    const results: st_combus = await prisma.st_combus.findFirst({
+    const results: IResults | null = await prisma.st_combus.findFirst({
       where: {
         fuel_type: fuelType,
         fuel_sub_type: fuelSubType,
@@ -67,6 +76,15 @@ export async function POST(req: NextRequest) {
         N2O_emis_grN2O_per_mmbtu: true,
       },
     });
+    if (results === null) {
+      // Handle the case where no results are found
+      return NextResponse.json(
+        {
+          error: "No data found for the specified criteria.",
+        },
+        { status: 404 }
+      );
+    }
 
     const {
       base_unit,
@@ -78,8 +96,12 @@ export async function POST(req: NextRequest) {
     } = results;
 
     const value_mmbtu =
-      convertUnit(amount, unit, base_unit, unit_type) *
-      hc_value_mmbtu_per_base_unit;
+      convertUnit(
+        amount,
+        unit as IAllLegitUnits,
+        base_unit as IAllLegitUnits,
+        unit_type as IQuantity
+      ) * hc_value_mmbtu_per_base_unit;
 
     const new_emis = {
       report_date: reportDate,
