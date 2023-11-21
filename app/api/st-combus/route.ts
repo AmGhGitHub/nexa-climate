@@ -1,6 +1,8 @@
 import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { convertUnit } from "@/lib/unitConverter";
+import { roundNumber } from "@/lib/utils";
+import { st_combus } from ".prisma/client";
 
 export async function GET(req: NextRequest) {
   const url = req.nextUrl;
@@ -51,7 +53,14 @@ export async function POST(req: NextRequest) {
     await req.json();
 
   try {
-    const unit_specs = await prisma.st_combus.findFirst({
+    const {
+      base_unit,
+      unit_type,
+      hc_value_mmbtu_per_base_unit,
+      CO2_emis_kgCO2_per_mmbtu,
+      CH4_emis_grCH4_per_mmbtu,
+      N2O_emis_grN2O_per_mmbtu,
+    } = await prisma.st_combus.findFirst({
       where: {
         fuel_type: fuelType,
         fuel_sub_type: fuelSubType,
@@ -59,30 +68,37 @@ export async function POST(req: NextRequest) {
       select: {
         base_unit: true,
         unit_type: true,
+        hc_value_mmbtu_per_base_unit: true,
         CO2_emis_kgCO2_per_mmbtu: true,
         CH4_emis_grCH4_per_mmbtu: true,
         N2O_emis_grN2O_per_mmbtu: true,
       },
     });
-    const unitType = unit_specs?.unit_type;
-    const base_unit = unit_specs?.base_unit;
-    const converted_amount = convertUnit(amount, unit, base_unit, unitType);
-    // console.log(amount, unit, base_unit, unitType);
-    // console.log("converted_amount", converted_amount);
 
-    // const new_emis = {
-    //   report_date: reportDate,
-    //   emission_source: emisSource,
-    //   CO2_emis: emisFactors.co2_emis_value * 1,
-    //   CH4_emis: emisFactors.ch4_emis_value * 25,
-    //   N2O_emis: emisFactors.n2o_emis_value * 298,
-    // };
-    // const res = await prisma.scope1_emission_summary.create({
-    //   data: new_emis,
-    // });
-    // return NextResponse.json(res, { status: 201 });
+    const value_mmbtu =
+      convertUnit(amount, unit, base_unit, unit_type) *
+      hc_value_mmbtu_per_base_unit;
 
-    return NextResponse.json(unit_specs, { status: 201 });
+    const new_emis = {
+      report_date: reportDate,
+      emission_source: emisSource,
+      CO2_emis: roundNumber(
+        (value_mmbtu * CO2_emis_kgCO2_per_mmbtu) / 1000.0,
+        2
+      ),
+      CH4_emis: roundNumber(
+        (value_mmbtu * CH4_emis_grCH4_per_mmbtu * 25) / 1.0e6,
+        2
+      ),
+      N2O_emis: roundNumber(
+        (value_mmbtu * N2O_emis_grN2O_per_mmbtu * 298) / 1.0e6,
+        2
+      ),
+    };
+    const res = await prisma.scope1_emission_summary.create({
+      data: new_emis,
+    });
+    return NextResponse.json(res, { status: 201 });
   } catch (error) {
     // console.error(error);
     return NextResponse.json({

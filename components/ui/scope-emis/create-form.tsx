@@ -2,7 +2,7 @@
 import axios from "axios";
 
 import { scope1_emission_sources } from "@prisma/client";
-
+import { useRouter } from "next/navigation";
 import { Calendar } from "@/components/ui/calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "@radix-ui/react-icons";
@@ -47,7 +47,7 @@ const formSchema = z.object({
   }),
   fuelType: z.string().min(4, { message: "A fuel type is required." }),
   fuelSubType: z.string().min(4, { message: "A fuel sub type is required." }),
-  unit: z.string().min(4, { message: "A unit is required." }),
+  unit: z.string().min(1, { message: "A unit is required." }),
   amount: z.number().min(0, { message: "An amount is required." }),
 });
 
@@ -130,27 +130,31 @@ export default function ProfileForm({
     setConsumpUnits([]);
   }, [form.watch("fuelType")]);
 
-  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
-    // console.log(values);
-    try {
-      const res = await axios.post("/api/st-combus", values);
-      // console.log(res.data);
-      toast({ title: "Emission entry created successfully!" });
-      window.location.href = "/calculator/scope1";
-    } catch (error) {
-      console.error("Submission error:", error);
-    }
-  }, []);
-
   useEffect(() => {
     const fuelType = form.watch("fuelType");
     const fuelSubType = form.watch("fuelSubType");
     fetchConsumpUnits(fuelType, fuelSubType).then(setConsumpUnits);
   }, [form.watch("fuelSubType"), form.watch("fuelType")]);
 
+  const router = useRouter();
+  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
+    try {
+      const res = await axios.post("/api/st-combus", values);
+      // console.log(res.data);
+      toast({ title: "Emission entry created successfully!" });
+      router.push("/calculator/scope1");
+      router.refresh();
+    } catch (error: any) {
+      toast({
+        title: "Error submitting form",
+        description: error.message,
+      });
+    }
+  }, []);
+
   return (
     <>
-      <h1 className="mb-5 text-xl text-teal-700 font-semibold">
+      <h1 className="mb-5 text-2xl text-zinc-800 font-semibold">
         Scope 1 Emission Entry
       </h1>
       <Form {...form}>
