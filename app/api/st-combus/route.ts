@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { convertUnit } from "@/lib/unit-converter";
 import { roundNumber } from "@/lib/utils";
 import { IAllLegitUnits, IQuantity } from "@/lib/unit-converter";
+import { z } from "zod";
+import { scope1_emission_summary } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   const url = req.nextUrl;
@@ -62,6 +64,9 @@ export async function POST(req: NextRequest) {
     await req.json();
 
   try {
+    const gwp = await prisma.gwp.findMany({});
+    console.log(gwp);
+
     const results: IResults | null = await prisma.st_combus.findFirst({
       where: {
         fuel_type: fuelType,

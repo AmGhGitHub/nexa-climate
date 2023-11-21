@@ -52,13 +52,6 @@ const Page = async () => {
             >
               <td className="whitespace-nowrap py-3 pl-6 pr-3">
                 <div className="flex items-center gap-3">
-                  {/* <Image
-                    src={data.image_url}
-                    className="rounded-full"
-                    width={28}
-                    height={28}
-                    alt={`${data.name}'s profile picture`}
-                  /> */}
                   <p>{formatDate(data.report_date)}</p>
                 </div>
               </td>
@@ -85,4 +78,3 @@ const Page = async () => {
 export default Page;
 
 export const dynamic = "force-dynamic";
-// 'auto' | 'force-dynamic' | 'error' | 'force-static'
