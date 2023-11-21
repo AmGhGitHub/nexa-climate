@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Calendar } from "@/components/ui/calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "@radix-ui/react-icons";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -142,8 +144,12 @@ export default function ProfileForm({
       const res = await axios.post("/api/st-combus", values);
       // console.log(res.data);
       toast({ title: "Emission entry created successfully!" });
-      router.push("/calculator/scope1");
-      router.refresh();
+      // https://stackoverflow.com/questions/69936157/how-to-trigger-hard-refresh-when-redirecting-to-a-different-page-in-next-js
+      window.location.href = "/calculator/scope1";
+      // router.push("/calculator/scope1");
+      // router.refresh();
+      // revalidatePath("/calculator/scope1");
+      // redirect("/calculator/scope1");
     } catch (error: any) {
       toast({
         title: "Error submitting form",
