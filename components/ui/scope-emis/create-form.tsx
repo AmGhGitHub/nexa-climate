@@ -144,10 +144,7 @@ export default function ProfileForm({
       toast({ title: "Emission entry created successfully!" });
       // https://stackoverflow.com/questions/69936157/how-to-trigger-hard-refresh-when-redirecting-to-a-different-page-in-next-js
       // window.location.href = "/calculator/scope1";
-      void router.push("/calculator/scope1");
-      router.refresh();
-      // revalidatePath("/calculator/scope1");
-      // redirect("/calculator/scope1");
+      router.push("/calculator/scope1");
     } catch (error: any) {
       toast({
         title: "Error submitting form",
